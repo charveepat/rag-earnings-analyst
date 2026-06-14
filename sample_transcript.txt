@@ -1,0 +1,124 @@
+Microsoft Corporation (MSFT)
+Q3 FY2026 Earnings Call Transcript
+Date: April 29, 2026
+Participants: Satya Nadella (CEO), Amy Hood (CFO), Jonathan Neilson (VP Investor Relations)
+
+================================================================================
+OPENING REMARKS — JONATHAN NEILSON, VP INVESTOR RELATIONS
+================================================================================
+
+Good afternoon and thank you for joining us today. On the call with me are
+Satya Nadella, Chairman and CEO, Amy Hood, Chief Financial Officer, Alice Jolla,
+Chief Accounting Officer, and Brian DeFoe, Deputy General Counsel.
+
+================================================================================
+CEO REMARKS — SATYA NADELLA
+================================================================================
+
+It was a record third quarter powered by the continued strength of Microsoft
+Cloud, which exceeded $54 billion in revenue, up 29% year-over-year.
+
+Our AI business surpassed an annual revenue run rate of $37 billion, up 123%
+year-over-year. GitHub Copilot is now in 140,000 organizations. Microsoft 365
+Copilot commercial seats exceed 20 million, up 250% year-over-year.
+
+We are pushing the frontier across our entire AI stack to drive new value for
+our customers and partners.
+
+================================================================================
+CFO REMARKS — AMY HOOD
+================================================================================
+
+REVENUE AND OPERATING INCOME:
+We delivered results that exceeded expectations across revenue, operating income,
+and earnings per share, reflecting strong execution and growing demand for the
+Microsoft Cloud.
+
+Total revenue: $82.9 billion, up 18% year-over-year, beating consensus of $81.4B.
+Microsoft Cloud revenue: $54.5 billion, up 29% year-over-year — the first time
+Microsoft Cloud has crossed $50 billion in a single quarter.
+
+Segment breakdown:
+- Intelligent Cloud (Azure, server products, GitHub): $34.68 billion, up 30%
+- Productivity and Business Processes (Office, LinkedIn, Dynamics): $35.01 billion, up 17%
+- More Personal Computing: declined year-over-year
+
+Azure growth: 40% year-over-year (39% in constant currency). Q2 guidance was
+37-38% constant currency — Azure came in above the high end.
+
+MARGINS:
+Gross margin: 67.6%, the narrowest since 2022, as depreciation costs mounted
+in connection with our data center infrastructure build-out.
+Operating margin Q4 guidance: approximately 44%, down from 46.3% in Q3.
+Microsoft Cloud gross margin Q4 guidance: approximately 64%, down year-over-year.
+
+CAPITAL EXPENDITURE:
+Q3 capex including finance leases: $31.9 billion, up 49% year-over-year.
+This came in below the $34.9 billion analyst consensus.
+
+For calendar year 2026, we expect to invest roughly $190 billion in capital
+expenditures. This includes approximately $25 billion from the impact of higher
+component pricing driven by the global memory crunch related to AI demand.
+Q4 capex guidance: over $40 billion in the quarter.
+
+We remain confident in the return on these investments, given higher demand
+signals and increasing product usage, as well as the efficiencies we are already
+driving across the platform — including 40% inference improvements.
+
+Two-thirds of our capex relates to short-lived assets (servers, GPUs, CPUs),
+with the remainder in longer-lived infrastructure (land, buildings).
+
+CAPACITY AND DEMAND:
+Despite these investments and continued efforts to bring GPU, CPU, and storage
+capacity online faster, we expect to remain supply-constrained at least through
+2026. We continue to balance first-party usage with Azure customer demand.
+
+We expect Azure growth to show modest acceleration in the second half of
+calendar year 2026 compared with the first half.
+
+BACKLOG AND FORWARD VISIBILITY:
+Commercial remaining performance obligations: $627 billion, up 99% year-over-year.
+This is the largest backlog Microsoft has ever reported — it doubled in a single year.
+
+OUTLOOK — FY2027:
+Management guided for continued double-digit revenue and operating income growth
+into FY2027, with capex rising above $40 billion in Q4 to meet persistent
+AI-driven demand.
+
+================================================================================
+ANALYST Q&A
+================================================================================
+
+Q (Brent Thill, Jefferies): One of the big pushbacks we get is that AI is going
+to be really expensive. How do you think about ROI on the $190B capex?
+
+A (Amy Hood): We remain confident in the return. Higher demand signals,
+increasing product usage, and efficiency gains like 40% inference improvements
+all support the investment case. The $25 billion component pricing impact is
+largely pass-through cost driven by the global memory environment.
+
+Q (Analyst): Can you give more colour on Azure acceleration into H2 CY2026?
+
+A (Amy Hood): We are getting better visibility into our ability to put pressure
+on efficiencies — speeding up deliveries into data centres and making capacity
+revenue-ready as quickly as possible. The pressure between first-party usage and
+Azure demand will persist, but we're doing our best to bring supply online faster,
+hence the capex ramp in H2.
+
+================================================================================
+KEY METRICS SUMMARY
+================================================================================
+
+- Total Revenue: $82.9B (+18% YoY)
+- Microsoft Cloud Revenue: $54.5B (+29% YoY)
+- Intelligent Cloud Revenue: $34.68B (+30% YoY)
+- Azure Growth: 40% YoY
+- AI Business ARR: $37B (+123% YoY)
+- M365 Copilot Seats: 20M+ (+250% YoY)
+- GitHub Copilot Organizations: 140,000
+- Commercial RPO (Backlog): $627B (+99% YoY)
+- Q3 Capex: $31.9B
+- CY2026 Capex Guidance: ~$190B
+- Gross Margin: 67.6%
+- EPS (Diluted): $4.27
+- Net Income: $31.778B

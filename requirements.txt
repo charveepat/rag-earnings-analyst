@@ -7,3 +7,8 @@ pypdf
 yfinance
 requests
 beautifulsoup4
+# Advanced RAG (--mode advanced) + Session 3 Claude generation
+anthropic
+chromadb
+rank-bm25
+numpy

@@ -1,136 +1,141 @@
 # RAG Earnings Analyst
 
-A local RAG pipeline that answers analyst questions from earnings call transcripts using LangChain, FAISS, and a locally-run LLM (Ollama). Now supports any transcript — local file or URL — plus optional live market data via yfinance.
-
-## Why This Exists
-
-FP&A analysts and investment researchers spend hours combing through earnings call transcripts looking for guidance figures, risk disclosures, and management commentary. This tool lets you ask:
-
-- "What did management say about capex guidance for FY2025?"
-- "Were there any covenant concerns mentioned?"
-- "Summarize the CFO's commentary on free cash flow."
-- "How does that guidance compare to where the stock is trading?"
-
-...and get a sourced answer in seconds — grounded in the actual transcript text, with optional live market context for the relevant ticker.
-
-## How It Works
-
-1. A transcript (local `.txt` file or a URL) is loaded and chunked into overlapping passages.
-2. Each chunk is embedded using a local sentence-transformer model (no OpenAI key needed).
-3. Chunks are indexed in a FAISS vector store for fast similarity search.
-4. (Optional) Live market data — price, P/E, market cap, 52-week range — is pulled for a given ticker via yfinance.
-5. When you ask a question, the top-k most relevant transcript chunks (plus market data, if provided) are passed as context to a local LLM (Llama 3 via Ollama), which generates a grounded answer.
+Ask investment questions. Get answers grounded in actual earnings call transcripts — not LLM training data guesses.
 
 ```
-Transcript (file or URL) ──► Chunk ──► Embed ──► FAISS Index
-                                                       │
-Ticker (optional) ──► yfinance ──► Market snapshot ──┤
-                                                       ▼
-                              Question ──► Retrieve top-k ──► LLM ──► Answer
+Q: What did the CFO say about margin guidance?
+
+A: [Microsoft (MSFT) — Q2 FY2024, CFO Amy Hood]
+   Operating margin expanded to 44%, up 500 basis points year over year.
+   Capital expenditures were $11.5B, driven by AI and cloud infrastructure.
 ```
 
-## Requirements
+## Why this exists
 
-Python 3.10+
+FP&A analysts and investment researchers spend hours combing through earnings transcripts for guidance figures, risk disclosures, and management commentary. This tool lets you query any transcript in plain English and get answers cited back to the source — company, quarter, and speaker.
+
+The core idea: **retrieval quality matters more than model quality.** Getting the right 4 chunks into context beats upgrading to a bigger model on bad context. This project tests that hypothesis across two retrieval architectures.
+
+## How it works
+
+```
+INDEX (one-time)
+  Transcript → Chunk (500 words, 50 overlap) → Embed → FAISS vector store
+
+RETRIEVE (per question)
+  Question → Embed → Cosine similarity → Top-k chunks
+
+GENERATE
+  [Chunks with source headers] + Question → LLM → Cited answer
+```
+
+Each retrieved chunk is labeled with its source before being sent to the LLM:
+```
+[NVIDIA (NVDA) — Q4 FY2024, CEO Jensen Huang]
+Data center revenue reached $18.4 billion, up 409% year over year...
+```
+
+This forces the model to cite who said what rather than blending sources.
+
+## Setup
 
 ```bash
 pip install -r requirements.txt
+cp .env.example .env
+# open .env and paste your ANTHROPIC_API_KEY (needed for advanced mode)
 ```
 
-No API keys needed for the language model. Runs fully locally using Ollama.
-
-Install Ollama from [ollama.com](https://ollama.com), then:
-
+Basic mode also requires [Ollama](https://ollama.ai) running locally:
 ```bash
 ollama pull llama3
 ```
 
-## How to Run
-
-**Demo mode** (uses the included Microsoft Q3 FY2026 sample transcript, runs 4 preset questions):
+## Quickstart
 
 ```bash
+# Built-in Big Tech sample — works immediately, no internet needed
+python main.py --sample --demo
+
+# Analyze any company (auto-fetches transcript from Motley Fool)
 python main.py
+
+# Advanced mode: 5 RAG techniques + Claude generation
+python main.py --sample --mode advanced --demo --eval
+
+# Your own transcript file
+python main.py --source path/to/transcript.txt --ticker MSFT
 ```
 
-**Any transcript, local file:**
+## Two modes
 
-```bash
-python main.py --source path/to/transcript.txt
-```
+### Basic (default)
+- LangChain + FAISS for vector storage
+- Ollama (llama3) as the local LLM — no API costs
+- Pure dense retrieval (cosine similarity only)
 
-**Any transcript, from a URL:**
+### Advanced (`--mode advanced`)
+Five techniques stacked on top of the basic pipeline, using Claude for generation:
 
-```bash
-python main.py --source https://example.com/earnings-call-transcript.txt
-```
+| # | Technique | What it does |
+|---|---|---|
+| T1 | Hybrid Search | BM25 keyword + dense embeddings — tunable with `--alpha` |
+| T2 | HyDE | Claude writes a hypothetical ideal answer, embeds *that*, then searches |
+| T3 | Re-ranking | CrossEncoder reads (query, passage) together for precise relevance |
+| T4 | Query Decomposition | Breaks complex questions into 2-4 atomic sub-queries, each retrieved independently |
+| T5 | RAG Evaluation | RAGAS-style scoring: faithfulness / relevance / precision / recall |
 
-**With live market data for a ticker** (adds price, P/E, market cap, 52-week range as context):
+Full pipeline per question: decompose → hybrid search per sub-query → merge → rerank → HyDE verify → rerank → generate → evaluate.
 
-```bash
-python main.py --source sample_transcript.txt --ticker MSFT
-```
+## Key flags
 
-**Interactive mode** — ask your own questions instead of the preset demo set:
+| Flag | Default | Description |
+|---|---|---|
+| `--sample` | off | Built-in NVDA/MSFT/AAPL/META/AMZN dataset — no fetch needed |
+| `--mode` | basic | `basic` or `advanced` |
+| `--demo` | off | Run preset questions; interactive if off |
+| `--eval` | off | Print RAGAS scores after each answer (advanced only) |
+| `--alpha` | 0.5 | Hybrid search: 0.0 = pure BM25, 1.0 = pure dense |
+| `--k` | 4 | Chunks retrieved per question |
+| `--ticker` | prompt | Stock ticker for live price/P/E/market cap context (yfinance) |
+| `--chunk-size` | 500 | Characters per chunk |
+| `--llm-model` | llama3 | Ollama model (basic mode only) |
+| `--anthropic-model` | claude-haiku-4-5 | Claude model (advanced mode only) |
 
-```bash
-python main.py --source sample_transcript.txt --ticker MSFT --interactive
-```
-
-**Tune retrieval and chunking** (optional):
-
-```bash
-python main.py --source sample_transcript.txt --k 6 --chunk-size 600 --chunk-overlap 75
-```
-
-**Use a different local LLM or embedding model**:
-
-```bash
-python main.py --llm-model mistral --embedding-model sentence-transformers/all-mpnet-base-v2
-```
-
-## Sample Output
-
-```
-Q: What did management say about capex guidance?
-A: CFO Amy Hood guided $190 billion in capex for calendar year 2026, up 61%
-from 2025, including $25 billion from higher component pricing. Q4 capex
-expected to exceed $40 billion.
-
-Q: Summarize the CFO commentary on margins.
-A: Gross margin came in at 67.6%, the narrowest since 2022 due to data center
-depreciation. Q4 operating margin guided at ~44%, down from 46.3% in Q3.
-
-Q: What were the key AI metrics mentioned?
-A: AI business ARR surpassed $37 billion, up 123% YoY. M365 Copilot seats
-exceeded 20 million. GitHub Copilot active in 140,000 organizations.
-```
-
-With `--ticker MSFT`, answers can also reference current price, P/E, and how
-guidance compares to where the stock is trading.
-
-## Project Structure
+## Project structure
 
 ```
 rag-earnings-analyst/
-├── main.py                # Main RAG pipeline — supports file/URL input + yfinance
-├── sample_transcript.txt  # Microsoft Q3 FY2026 earnings call transcript (demo)
-├── requirements.txt       # Dependencies
+├── main.py               — full RAG pipeline (basic + advanced modes)
+├── sample_transcript.txt — Microsoft Q3 FY2026 transcript (demo for live-fetch mode)
+├── requirements.txt      — all dependencies
+├── .env.example          — API key template
+├── .gitignore
+├── DEVLOG.md             — build log: what was tried, what broke, what changed
 └── README.md
 ```
 
-## Sample Transcript
+## What's in the built-in sample
 
-The repo includes `sample_transcript.txt` — Microsoft's actual Q3 FY2026 earnings
-call (April 29, 2026), sourced from public SEC filings and investor relations.
-Key topics: Azure growth, $190B capex guidance, AI business ARR, cloud margins.
+10 excerpts from Big Tech earnings calls (public transcripts), each tagged with company, ticker, quarter, and speaker:
 
-## What's Next
+| Company | Ticker | Quarter | Speakers |
+|---|---|---|---|
+| NVIDIA | NVDA | Q4 FY2024 | CEO Jensen Huang, CFO Colette Kress |
+| Microsoft | MSFT | Q2 FY2024 | CEO Satya Nadella, CFO Amy Hood |
+| Apple | AAPL | Q1 FY2024 | CEO Tim Cook, CFO Luca Maestri |
+| Meta | META | Q4 2023 | CEO Mark Zuckerberg, CFO Susan Li |
+| Amazon | AMZN | Q4 2023 | CEO Andy Jassy, CFO Brian Olsavsky |
 
-- Support for PDF transcripts directly (currently text only)
-- Multi-document comparison (e.g. compare guidance across two quarters)
-- Source citation in answers (which chunk/section the answer came from)
+Good cross-company questions to try:
+- "Which companies showed the strongest revenue growth?"
+- "What are the AI infrastructure investment trends? Who is spending most?"
+- "Compare operating margins — who is most profitable?"
 
-## About
+## Stack
 
-Built by [Charvee Patel](https://github.com/charveepat) — MS Finance (Data Analytics), UIUC Gies College of Business. This project demonstrates practical application of RAG architecture to financial document analysis, relevant to FP&A automation and AI-assisted investment research.
+`sentence-transformers` · `faiss-cpu` · `rank-bm25` · `anthropic` · `langchain` · `yfinance` · `beautifulsoup4`
+
+---
+
+Built by [Charvee Patel](https://github.com/charveepat) — MS Finance (Data Analytics), UIUC Gies.
+RAG architecture applied to financial document analysis — relevant to FP&A automation and AI-assisted investment research.

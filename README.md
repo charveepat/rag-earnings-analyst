@@ -110,7 +110,6 @@ rag-earnings-analyst/
 ├── requirements.txt      — all dependencies
 ├── .env.example          — API key template
 ├── .gitignore
-├── DEVLOG.md             — build log: what was tried, what broke, what changed
 └── README.md
 ```
 
